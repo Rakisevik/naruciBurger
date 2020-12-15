@@ -1,22 +1,20 @@
 package com.example.demo.security;
 
+import com.example.demo.auth.ApplicationCustomerService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import java.util.concurrent.TimeUnit;
 
 import static com.example.demo.security.ApplicationCustomerRole.ADMIN;
-import static com.example.demo.security.ApplicationCustomerRole.CUSTOMER;
 
 @Configuration
 @EnableWebSecurity
@@ -24,9 +22,11 @@ import static com.example.demo.security.ApplicationCustomerRole.CUSTOMER;
 public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final PasswordEncoder passwordEncoder;
+    private final ApplicationCustomerService applicationCustomerService;
 
-    public ApplicationSecurityConfig(PasswordEncoder passwordEncoder) {
+    public ApplicationSecurityConfig(PasswordEncoder passwordEncoder, ApplicationCustomerService applicationCustomerService) {
         this.passwordEncoder = passwordEncoder;
+        this.applicationCustomerService = applicationCustomerService;
     }
 
     @Override
@@ -64,27 +64,41 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
         ;
     }
 
+//    @Override
+//    @Bean
+//    protected UserDetailsService userDetailsService() {
+//        UserDetails stefanRakicevicCustomer = User.builder()
+//                .username("Rakicevic")
+//                .password(passwordEncoder.encode("Stefan"))
+////                .roles(CUSTOMER.name())
+//                .authorities(CUSTOMER.getGrantedAuthorities())
+//                .build();
+//
+//        UserDetails nikolaVeljicCustomer = User.builder()
+//                .username("Veljic")
+//                .password(passwordEncoder.encode("password123"))
+////                .roles(ADMIN.name())
+//                .authorities(ADMIN.getGrantedAuthorities())
+//                .build();
+//
+//
+//        return new InMemoryUserDetailsManager(
+//                stefanRakicevicCustomer,
+//                nikolaVeljicCustomer
+//        );
+//    }
+
+
     @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.authenticationProvider(daoAuthenticationProvider());
+    }
+
     @Bean
-    protected UserDetailsService userDetailsService() {
-        UserDetails stefanRakicevicCustomer = User.builder()
-                .username("Rakicevic")
-                .password(passwordEncoder.encode("Stefan"))
-//                .roles(CUSTOMER.name())
-                .authorities(CUSTOMER.getGrantedAuthorities())
-                .build();
-
-        UserDetails nikolaVeljicCustomer = User.builder()
-                .username("Veljic")
-                .password(passwordEncoder.encode("password123"))
-//                .roles(ADMIN.name())
-                .authorities(ADMIN.getGrantedAuthorities())
-                .build();
-
-
-        return new InMemoryUserDetailsManager(
-                stefanRakicevicCustomer,
-                nikolaVeljicCustomer
-        );
+    public DaoAuthenticationProvider daoAuthenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setPasswordEncoder(passwordEncoder);
+        provider.setUserDetailsService(applicationCustomerService);
+        return provider;
     }
 }
