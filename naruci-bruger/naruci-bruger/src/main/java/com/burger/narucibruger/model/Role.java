@@ -1,6 +1,7 @@
 package com.burger.narucibruger.model;
 
 import javax.persistence.*;
+import java.util.Set;
 
 @Entity
 @Table(name = "role")
@@ -9,12 +10,17 @@ public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String role;
+
+    @Enumerated(EnumType.STRING)
+    private ERole role;
+
+    @OneToMany()
+    private Set<User> users;
 
     public Role() {
     }
 
-    public Role(String role) {
+    public Role(ERole role) {
         this.role = role;
     }
 
@@ -26,11 +32,19 @@ public class Role {
         this.id = id;
     }
 
-    public String getRole() {
+    public ERole getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(ERole role) {
         this.role = role;
+    }
+
+    public Set<User> getUsers() {
+        return users;
+    }
+
+    public void setUsers(Set<User> users) {
+        this.users = users;
     }
 }

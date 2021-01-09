@@ -1,10 +1,9 @@
 package com.burger.narucibruger.model;
 
-import org.hibernate.PersistentObjectException;
 
 import javax.persistence.*;
 import java.util.Collection;
-import java.util.List;
+
 
 @Entity
 @Table(name = "user", uniqueConstraints = @UniqueConstraint(columnNames = {"mail","username"}))
@@ -35,19 +34,16 @@ public class User {
     @Column(name = "password")
     private String password;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinTable( name = "user_role",
-                joinColumns = @JoinColumn(
-                    name = "user_id", referencedColumnName = "id"),
-                inverseJoinColumns = @JoinColumn(
-                    name = "role_id", referencedColumnName = "id")
-    )
-    private Collection<Role> roles;
+
+    @ManyToOne
+    @JoinColumn(name = "role_id")
+    private Role role;
+
 
     public User() {
     }
 
-    public User(String name, String surname, String mail, String phone, String address, String username, String password, Collection<Role> roles) {
+    public User(String name, String surname, String mail, String phone, String address, String username, String password, Role role) {
         this.name = name;
         this.surname = surname;
         this.mail = mail;
@@ -55,7 +51,7 @@ public class User {
         this.address = address;
         this.username = username;
         this.password = password;
-        this.roles = roles;
+        this.role = role;
     }
 
 
@@ -124,12 +120,12 @@ public class User {
         this.password = password;
     }
 
-    public Collection<Role> getRoles() {
-        return roles;
+    public Role getRole() {
+        return role;
     }
 
-    public void setRoles(Collection<Role> roles) {
-        this.roles = roles;
+    public void setRole(Role role) {
+        this.role = role;
     }
 
 
